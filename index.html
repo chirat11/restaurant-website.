@@ -20,7 +20,7 @@
     .product {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center; /* จัดให้อยู่ตรงกลาง */
+      justify-content: center;
       gap: 20px;
       margin: 20px;
     }
@@ -104,7 +104,7 @@
     #checkout-btn:hover {
       background-color: #0056b3;
     }
-    #qr-container {
+    #receipt-container {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -115,13 +115,14 @@
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       z-index: 1000;
+      width: 300px;
       text-align: center;
     }
-    #qr-container img {
+    #receipt-container img {
       max-width: 200px;
       height: auto;
     }
-    #qr-container button {
+    #receipt-container button {
       margin-top: 20px;
       background-color: #dc3545;
       color: white;
@@ -130,24 +131,12 @@
       cursor: pointer;
       border-radius: 5px;
     }
-    #qr-container button:hover {
+    #receipt-container button:hover {
       background-color: #c82333;
     }
-    #payment-status, #total-amount-display {
-      margin-top: 10px;
-      font-weight: bold;
-      color: #555;
-    }
-
-    /* Media Queries สำหรับหน้าจอเล็ก */
-    @media (max-width: 768px) {
-      .product-item {
-        width: 90%; /* ใช้พื้นที่หน้าจอมากขึ้น */
-        margin: 0 auto;
-      }
-      #qr-container {
-        width: 90%; /* ลดความกว้างของ QR Container */
-      }
+    #receipt-details {
+      text-align: left;
+      margin: 10px 0;
     }
   </style>
 </head>
@@ -175,11 +164,12 @@
     <p id="cart-total">Total: $0</p>
     <button id="checkout-btn">ชำระเงิน</button>
   </div>
-  <div id="qr-container" style="display: none;">
-    <h3>สแกนเพื่อชำระเงิน</h3>
+  <div id="receipt-container" style="display: none;">
+    <h3>ใบเสร็จรับเงิน</h3>
+    <div id="receipt-details"></div>
     <img id="qr-image" src="qr.png" alt="QR Code">
     <p id="total-amount-display">ยอดเงินที่ต้องชำระ: $0</p>
-    <button id="close-qr">ปิด</button>
+    <button id="close-receipt">ปิด</button>
   </div>
   <script>
     const cart = [];
@@ -220,18 +210,30 @@
 
     document.getElementById("checkout-btn").addEventListener("click", function () {
       const totalAmount = cart.reduce((total, item) => total + item.price, 0).toFixed(2);
+
+      const receiptDetails = document.getElementById("receipt-details");
+      receiptDetails.innerHTML = ""; // ล้างข้อมูลใบเสร็จเดิม
+      cart.forEach(item => {
+        const itemDetail = document.createElement("p");
+        itemDetail.textContent = `${item.name}: $${item.price}`;
+        receiptDetails.appendChild(itemDetail);
+      });
+
       document.getElementById("total-amount-display").textContent = `ยอดเงินที่ต้องชำระ: $${totalAmount}`;
-
-      const qrContainer = document.getElementById("qr-container");
-      qrContainer.style.display = "block";
-
       const qrImage = document.getElementById("qr-image");
-      qrImage.src = "qr.png"; // เปลี่ยนเป็นเส้นทางของไฟล์ QR Code ของมึง
+      qrImage.src = "qr.png"; // เปลี่ยนเส้นทาง QR Code
+
+      const receiptContainer = document.getElementById("receipt-container");
+      receiptContainer.style.display = "block";
     });
 
-    document.getElementById("close-qr").addEventListener("click", function () {
-      const qrContainer = document.getElementById("qr-container");
-      qrContainer.style.display = "none";
+    document.getElementById("close-receipt").addEventListener("click", function () {
+      const receiptContainer = document.getElementById("receipt-container");
+      receiptContainer.style.display = "none";
+
+      // รีเซ็ตตะกร้าสินค้า
+      cart.length = 0; // ล้างรายการสินค้าในตะกร้า
+      updateCart(); // อัปเดตหน้าตะกร้า
     });
   </script>
 </body>
